@@ -67,7 +67,7 @@ export const useSettingsStore = create<SettingsState>()(
         cohere: 'https://api.cohere.ai/compatibility/v1',
         mistral: 'https://api.mistral.ai/v1',
         vertex_ai: 'https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/endpoints/openapi/v1',
-        cloudflare: 'https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1',
+        cloudflare: 'https://gateway.ai.cloudflare.com/v1/{ACCOUNT_ID}/{GATEWAY_ID}',
         google_ai_studio: 'https://generativelanguage.googleapis.com/v1beta/openai',
       },
       selectedProvider: 'openrouter',

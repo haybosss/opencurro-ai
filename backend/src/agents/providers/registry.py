@@ -134,7 +134,7 @@ class ProviderRegistry:
                 ProviderMetadata(
                     id=ProviderType.CLOUDFLARE,
                     label="Cloudflare Workers AI",
-                    default_base_url="https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1",
+                    default_base_url="https://gateway.ai.cloudflare.com/v1/{ACCOUNT_ID}/{GATEWAY_ID}",
                 )
             ),
             ProviderType.GOOGLE_AI_STUDIO: GoogleAIStudioProvider(
