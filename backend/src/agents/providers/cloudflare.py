@@ -31,9 +31,11 @@ _CF_MODEL_IDS = [
 
 
 def _norm_base_url(base_url: str) -> str:
-    url = base_url.rstrip("/")
-    url = re.sub(r"/(chat/completions|completions)$", "", url)
-    return url
+    url = base_url.strip().rstrip("/")
+    url = re.sub(r"https?://", "https://", url, count=1)
+    url = re.sub(r"/(chat/completions|completions)(/|$)", "/", url)
+    url = re.sub(r"/(chat/completions|completions)(/|$)", "/", url)
+    return url.rstrip("/")
 
 
 def _extract_account_id(url: str) -> Optional[str]:
