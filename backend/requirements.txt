@@ -10,4 +10,5 @@ novita-sandbox
 tavily-python
 exa-py
 google-search-results
+cryptography
 firecrawl-py

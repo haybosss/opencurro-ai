@@ -1,7 +1,10 @@
 from src.agents.providers.base import LLMProvider
+from src.agents.providers.cloudflare import CloudflareProvider
 from src.agents.providers.cohere import CohereProvider
+from src.agents.providers.google_ai_studio import GoogleAIStudioProvider
 from src.agents.providers.openai_compatible import OpenAICompatibleProvider
 from src.agents.providers.ollama_cloud import OllamaCloudProvider
+from src.agents.providers.vertex_ai import VertexAIProvider
 from src.schemas.providers import ProviderMetadata, ProviderType
 
 
@@ -111,6 +114,34 @@ class ProviderRegistry:
                     id=ProviderType.COHERE,
                     label="Cohere",
                     default_base_url="https://api.cohere.ai/compatibility/v1",
+                )
+            ),
+            ProviderType.MISTRAL: OpenAICompatibleProvider(
+                ProviderMetadata(
+                    id=ProviderType.MISTRAL,
+                    label="Mistral AI",
+                    default_base_url="https://api.mistral.ai/v1",
+                )
+            ),
+            ProviderType.VERTEX_AI: VertexAIProvider(
+                ProviderMetadata(
+                    id=ProviderType.VERTEX_AI,
+                    label="Google Cloud Vertex AI",
+                    default_base_url="https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/endpoints/openapi/v1",
+                )
+            ),
+            ProviderType.CLOUDFLARE: CloudflareProvider(
+                ProviderMetadata(
+                    id=ProviderType.CLOUDFLARE,
+                    label="Cloudflare Workers AI",
+                    default_base_url="https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1",
+                )
+            ),
+            ProviderType.GOOGLE_AI_STUDIO: GoogleAIStudioProvider(
+                ProviderMetadata(
+                    id=ProviderType.GOOGLE_AI_STUDIO,
+                    label="Google AI Studio",
+                    default_base_url="https://generativelanguage.googleapis.com/v1beta/openai",
                 )
             ),
         }

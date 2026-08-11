@@ -7,7 +7,7 @@ import { useSettingsStore } from '@/store/useSettingsStore'
 import { cn } from '@/lib/utils'
 import type { ProviderId } from '@/types/chat'
 
-const providers: ProviderId[] = ['openrouter', 'groq', 'nvidia', 'fireworks', 'ollama_cloud', 'opencode_zen', 'aihubmix', 'blueclaw', 'requesty', 'unorouter', 'vercel_ai_gateway', 'zenmux', 'kilo_code', 'chutes', 'cohere']
+const providers: ProviderId[] = ['openrouter', 'groq', 'nvidia', 'fireworks', 'ollama_cloud', 'opencode_zen', 'aihubmix', 'blueclaw', 'requesty', 'unorouter', 'vercel_ai_gateway', 'zenmux', 'kilo_code', 'chutes', 'cohere', 'mistral', 'vertex_ai', 'cloudflare', 'google_ai_studio']
 
 const PROVIDER_META: Record<ProviderId, { description: string; iconClass: string }> = {
   openrouter: { description: 'Access any foundation model', iconClass: 'bg-[rgba(59,130,246,0.12)] text-[#3b82f6]' },
@@ -25,6 +25,10 @@ const PROVIDER_META: Record<ProviderId, { description: string; iconClass: string
   kilo_code: { description: '500+ models, zero markup, agent-ready gateway', iconClass: 'bg-[rgba(251,191,36,0.12)] text-[#fbbf24]' },
   chutes: { description: 'Decentralized serverless AI inference platform', iconClass: 'bg-[rgba(99,102,241,0.12)] text-[#6366f1]' },
   cohere: { description: 'Command models with tool use and structured outputs', iconClass: 'bg-[rgba(45,120,104,0.12)] text-[#2d7868]' },
+  mistral: { description: 'Open-weight and frontier models by Mistral AI', iconClass: 'bg-[rgba(250,146,60,0.12)] text-[#fa923c]' },
+  vertex_ai: { description: 'Google Cloud Vertex AI with Gemini models', iconClass: 'bg-[rgba(66,133,244,0.12)] text-[#4285f4]' },
+  cloudflare: { description: 'Serverless GPU inference at the edge', iconClass: 'bg-[rgba(246,130,32,0.12)] text-[#f68220]' },
+  google_ai_studio: { description: 'Free Gemini API access via Google AI Studio', iconClass: 'bg-[rgba(52,168,83,0.12)] text-[#34a853]' },
 }
 
 export function ModelsTab() {

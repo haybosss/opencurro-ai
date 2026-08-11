@@ -20,6 +20,10 @@ class ProviderType(str, Enum):
     KILO_CODE = "kilo_code"
     CHUTES = "chutes"
     COHERE = "cohere"
+    MISTRAL = "mistral"
+    VERTEX_AI = "vertex_ai"
+    CLOUDFLARE = "cloudflare"
+    GOOGLE_AI_STUDIO = "google_ai_studio"
 
 
 class ProviderMetadata(BaseModel):
