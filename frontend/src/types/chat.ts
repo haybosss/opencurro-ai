@@ -1,6 +1,6 @@
 export type ChatRole = 'user' | 'assistant'
 
-export type ProviderId = 'openrouter' | 'groq' | 'nvidia' | 'fireworks' | 'ollama_cloud' | 'opencode_zen' | 'aihubmix' | 'blueclaw' | 'requesty' | 'unorouter' | 'vercel_ai_gateway' | 'zenmux' | 'kilo_code' | 'chutes' | 'cohere'
+export type ProviderId = 'openrouter' | 'groq' | 'nvidia' | 'fireworks' | 'ollama_cloud' | 'opencode_zen' | 'aihubmix' | 'blueclaw' | 'requesty' | 'unorouter' | 'vercel_ai_gateway' | 'zenmux' | 'kilo_code' | 'chutes' | 'cohere' | 'mistral' | 'google_gemini'
 
 export interface ToolChip {
   id: string

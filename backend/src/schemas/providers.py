@@ -20,6 +20,8 @@ class ProviderType(str, Enum):
     KILO_CODE = "kilo_code"
     CHUTES = "chutes"
     COHERE = "cohere"
+    MISTRAL = "mistral"
+    GOOGLE_GEMINI = "google_gemini"
 
 
 class ProviderMetadata(BaseModel):

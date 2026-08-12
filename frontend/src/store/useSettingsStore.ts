@@ -48,7 +48,7 @@ function generateId(): string {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      providerKeys: { openrouter: '', groq: '', nvidia: '', fireworks: '', ollama_cloud: '', opencode_zen: '', aihubmix: '', blueclaw: '', requesty: '', unorouter: '', vercel_ai_gateway: '', zenmux: '', kilo_code: '', chutes: '', cohere: '' },
+      providerKeys: { openrouter: '', groq: '', nvidia: '', fireworks: '', ollama_cloud: '', opencode_zen: '', aihubmix: '', blueclaw: '', requesty: '', unorouter: '', vercel_ai_gateway: '', zenmux: '', kilo_code: '', chutes: '', cohere: '', mistral: '', google_gemini: '' },
       providerBaseUrls: {
         openrouter: 'https://openrouter.ai/api/v1',
         groq: 'https://api.groq.com/openai/v1',
@@ -65,6 +65,8 @@ export const useSettingsStore = create<SettingsState>()(
         kilo_code: 'https://api.kilo.ai/api/gateway',
         chutes: 'https://llm.chutes.ai/v1',
         cohere: 'https://api.cohere.ai/compatibility/v1',
+        mistral: 'https://api.mistral.ai/v1',
+        google_gemini: 'https://generativelanguage.googleapis.com/v1beta',
       },
       selectedProvider: 'openrouter',
       selectedModel: '',
@@ -76,7 +78,7 @@ export const useSettingsStore = create<SettingsState>()(
       searchProvider: 'tavily',
       firecrawlApiKey: '',
       providerCatalog: [],
-      modelsByProvider: { openrouter: [], groq: [], nvidia: [], fireworks: [], ollama_cloud: [], opencode_zen: [], aihubmix: [], blueclaw: [], requesty: [], unorouter: [], vercel_ai_gateway: [], zenmux: [], kilo_code: [], chutes: [], cohere: [] },
+      modelsByProvider: { openrouter: [], groq: [], nvidia: [], fireworks: [], ollama_cloud: [], opencode_zen: [], aihubmix: [], blueclaw: [], requesty: [], unorouter: [], vercel_ai_gateway: [], zenmux: [], kilo_code: [], chutes: [], cohere: [], mistral: [], google_gemini: [] },
       subAgents: [],
       setProviderKey: (provider, value) => set((state) => ({ providerKeys: { ...state.providerKeys, [provider]: value } })),
       setProviderBaseUrl: (provider, value) => set((state) => ({ providerBaseUrls: { ...state.providerBaseUrls, [provider]: value } })),

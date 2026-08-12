@@ -1,5 +1,7 @@
 from src.agents.providers.base import LLMProvider
 from src.agents.providers.cohere import CohereProvider
+from src.agents.providers.gemini import GeminiProvider
+from src.agents.providers.mistral import MistralProvider
 from src.agents.providers.openai_compatible import OpenAICompatibleProvider
 from src.agents.providers.ollama_cloud import OllamaCloudProvider
 from src.schemas.providers import ProviderMetadata, ProviderType
@@ -111,6 +113,20 @@ class ProviderRegistry:
                     id=ProviderType.COHERE,
                     label="Cohere",
                     default_base_url="https://api.cohere.ai/compatibility/v1",
+                )
+            ),
+            ProviderType.MISTRAL: MistralProvider(
+                ProviderMetadata(
+                    id=ProviderType.MISTRAL,
+                    label="Mistral AI",
+                    default_base_url="https://api.mistral.ai/v1",
+                )
+            ),
+            ProviderType.GOOGLE_GEMINI: GeminiProvider(
+                ProviderMetadata(
+                    id=ProviderType.GOOGLE_GEMINI,
+                    label="Google Gemini",
+                    default_base_url="https://generativelanguage.googleapis.com/v1beta",
                 )
             ),
         }
