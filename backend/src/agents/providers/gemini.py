@@ -98,7 +98,7 @@ class GeminiProvider(LLMProvider):
 
         async with httpx.AsyncClient(timeout=httpx.Timeout(90.0, connect=30.0)) as client:
             async with client.stream("POST", endpoint, headers=headers, json=payload) as response:
-                self._handle_api_error(response)
+                await self._handle_api_error(response)
                 async for event in self._iter_sse_events(response):
                     if event == "[DONE]":
                         break
@@ -247,31 +247,38 @@ class GeminiProvider(LLMProvider):
             )
         return None
 
-    def _handle_api_error(self, response: httpx.Response) -> None:
+    async def _handle_api_error(self, response: httpx.Response) -> None:
         if response.status_code < 400:
             return
         try:
-            body = response.json()
-            err_msg = body.get("error", {}).get("message", response.text)
+            body = await response.aread()
+            payload = json.loads(body)
+            err_detail = payload.get("error", {}).get("message", body.decode(errors="replace"))
         except Exception:
-            err_msg = response.text
+            err_detail = ""
         if response.status_code == 404:
             err_msg = (
-                f"Gemini model not found (404). The model may not be available for your API key "
-                f"or may have been deprecated. Try using a different model. Details: {err_msg}"
+                "Gemini model not found (404). The model may not be available for your API key "
+                "or may have been deprecated. Try using a different model."
             )
+            if err_detail:
+                err_msg += f" Details: {err_detail}"
         elif response.status_code == 429:
-            err_msg = f"Gemini rate limit exceeded (429). Please wait and try again. Details: {err_msg}"
+            err_msg = "Gemini rate limit exceeded (429). Please wait and try again."
+            if err_detail:
+                err_msg += f" Details: {err_detail}"
         elif response.status_code == 403:
             err_msg = (
-                f"Gemini access denied (403). Your API key may not have access to this model "
-                f"or your account may have restrictions. Details: {err_msg}"
+                "Gemini access denied (403). Your API key may not have access to this model "
+                "or your account may have restrictions."
             )
+            if err_detail:
+                err_msg += f" Details: {err_detail}"
         else:
-            err_msg = f"Gemini API error ({response.status_code}): {err_msg}"
-        raise httpx.HTTPStatusError(
-            err_msg, request=response.request, response=response
-        )
+            err_msg = f"Gemini API error ({response.status_code})"
+            if err_detail:
+                err_msg += f": {err_detail}"
+        raise httpx.HTTPStatusError(err_msg, request=response.request, response=response)
 
     def _fallback_models(self) -> list[ProviderModel]:
         return [
