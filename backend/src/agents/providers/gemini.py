@@ -10,6 +10,16 @@ from src.schemas.providers import ProviderMetadata, ProviderModel
 
 
 class GeminiProvider(LLMProvider):
+    _FALLBACK_MODELS = [
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-3.0-flash",
+        "gemini-3.0-pro",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-exp",
+    ]
+
     def __init__(self, metadata: ProviderMetadata) -> None:
         self.metadata = metadata
         self._models_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -19,19 +29,21 @@ class GeminiProvider(LLMProvider):
         endpoint = f"{self._models_endpoint}?key={api_key}"
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(endpoint)
-            response.raise_for_status()
+            if response.status_code >= 400:
+                return self._fallback_models()
             payload = response.json()
 
         items = payload.get("models", [])
         models: list[ProviderModel] = []
         for item in items:
             name = item.get("name", "")
-            model_id = name.replace("models/", "")
+            model_id = name.split("/")[-1] if name else ""
             if not model_id:
                 continue
             supported_methods = item.get("supportedGenerationMethods", [])
+            if "streamGenerateContent" not in supported_methods:
+                continue
 
-            supports_tools = "generateContent" in supported_methods
             input_limit = item.get("inputTokenLimit")
             output_limit = item.get("outputTokenLimit")
             context_window = None
@@ -46,11 +58,13 @@ class GeminiProvider(LLMProvider):
                     provider=self.metadata.id,
                     label=item.get("displayName") or model_id,
                     owned_by="Google",
-                    supports_tools=supports_tools,
+                    supports_tools="generateContent" in supported_methods,
                     context_window=context_window,
                 )
             )
         models.sort(key=lambda model: model.label.lower())
+        if not models:
+            return self._fallback_models()
         return models
 
     async def stream_chat_completion(
@@ -84,7 +98,7 @@ class GeminiProvider(LLMProvider):
 
         async with httpx.AsyncClient(timeout=httpx.Timeout(90.0, connect=30.0)) as client:
             async with client.stream("POST", endpoint, headers=headers, json=payload) as response:
-                response.raise_for_status()
+                self._handle_api_error(response)
                 async for event in self._iter_sse_events(response):
                     if event == "[DONE]":
                         break
@@ -195,7 +209,7 @@ class GeminiProvider(LLMProvider):
 
         for i, part in enumerate(parts):
             if "text" in part:
-                text += part["text"]
+                text += part.get("text", "")
             if "thought" in part:
                 reasoning += str(part.get("thought", ""))
             if "functionCall" in part:
@@ -233,26 +247,71 @@ class GeminiProvider(LLMProvider):
             )
         return None
 
+    def _handle_api_error(self, response: httpx.Response) -> None:
+        if response.status_code < 400:
+            return
+        try:
+            body = response.json()
+            err_msg = body.get("error", {}).get("message", response.text)
+        except Exception:
+            err_msg = response.text
+        if response.status_code == 404:
+            err_msg = (
+                f"Gemini model not found (404). The model may not be available for your API key "
+                f"or may have been deprecated. Try using a different model. Details: {err_msg}"
+            )
+        elif response.status_code == 429:
+            err_msg = f"Gemini rate limit exceeded (429). Please wait and try again. Details: {err_msg}"
+        elif response.status_code == 403:
+            err_msg = (
+                f"Gemini access denied (403). Your API key may not have access to this model "
+                f"or your account may have restrictions. Details: {err_msg}"
+            )
+        else:
+            err_msg = f"Gemini API error ({response.status_code}): {err_msg}"
+        raise httpx.HTTPStatusError(
+            err_msg, request=response.request, response=response
+        )
+
+    def _fallback_models(self) -> list[ProviderModel]:
+        return [
+            ProviderModel(
+                id=mid,
+                provider=self.metadata.id,
+                label=mid,
+                owned_by="Google",
+                supports_tools=True,
+            )
+            for mid in self._FALLBACK_MODELS
+        ]
+
     async def _iter_sse_events(self, response: httpx.Response) -> AsyncGenerator[dict[str, Any] | str, None]:
         buffer = ""
         async for chunk in response.aiter_text():
             buffer += chunk
             while "\n\n" in buffer:
                 raw_event, buffer = buffer.split("\n\n", 1)
-                data_lines: list[str] = []
-                for line in raw_event.splitlines():
-                    line = line.strip()
-                    if not line or line.startswith(":"):
-                        continue
-                    if line.startswith("data:"):
-                        data_lines.append(line[5:].strip())
-                if not data_lines:
-                    continue
-                data = "\n".join(data_lines)
-                if data == "[DONE]":
-                    yield data
-                    return
-                try:
-                    yield json.loads(data)
-                except json.JSONDecodeError:
-                    continue
+                for event in self._parse_sse_raw(raw_event):
+                    yield event
+        if buffer.strip():
+            for event in self._parse_sse_raw(buffer.strip()):
+                yield event
+
+    def _parse_sse_raw(self, raw: str) -> list[dict[str, Any] | str]:
+        lines = raw.split("\n")
+        data_parts: list[str] = []
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith(":"):
+                continue
+            if line.startswith("data:"):
+                data_parts.append(line[5:].strip())
+        if not data_parts:
+            return []
+        data = "\n".join(data_parts)
+        if data == "[DONE]":
+            return [data]
+        try:
+            return [json.loads(data)]
+        except json.JSONDecodeError:
+            return []
